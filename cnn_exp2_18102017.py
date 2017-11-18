@@ -447,7 +447,7 @@ if __name__ == "__main__":
     #     accuracy_array.append(accuracy)
 
         #get the top 100, most confused images
-        retrain_idx = np.argsort(probs[:,0] - probs[:, 1])[:retrain_size]
+        retrain_idx = np.argsort(abs(probs[:,0] - probs[:, 1]))[:retrain_size]
         #print(len(retrain_idx))
 
         retrain_set = [test_batches.filenames[i] for i in retrain_idx]
