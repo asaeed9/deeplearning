@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 from theano.sandbox import cuda
 cuda.use('gpu1')
-#path="../data/2cat/sample"
+#path="../data/2cat_debug/sample"
 import utils; reload(utils)
 from utils import *
 from IPython.display import FileLink
@@ -16,9 +16,9 @@ from keras.layers.core import Flatten, Dense, Dropout, Lambda
 from keras.optimizers import SGD, RMSprop, Adam
 import datetime
 
-data_dir="/home/asaeed9/work/data/2cat"
-path="/home/asaeed9/work/data/2cat/sample/"
-results_path = "/home/asaeed9/work/data/2cat/sample/results"
+data_dir="/home/asaeed9/work/data/2cat_debug"
+path="/home/asaeed9/work/data/2cat_debug/sample/"
+results_path = "/home/asaeed9/work/data/2cat_debug/sample/results"
 test_path = path + '/test/' #We use all the test data
 
 def adjust_prev_data_sample(dest):
@@ -337,7 +337,7 @@ def move_files(src_path, dest_path, pattern):
     		print ("Unable to move file. ".format(e))
 
 def refil_unlabel(nimages):
-    os.chdir("/home/asaeed9/work/data/2cat/train")
+    os.chdir("/home/asaeed9/work/data/2cat_debug/F_sample")
     g = glob('*.jpg')
     shuf = np.random.permutation(g)
     for i in range(nimages): os.rename(shuf[i], '../sample/unlabel/' + shuf[i])
@@ -352,23 +352,19 @@ if __name__ == "__main__":
 
     #os.chdir("/home/ahsan/work/deeplearning/")
     existing_model = 0
-    os.chdir("../data/2cat/train")
+    os.chdir("../data/2cat_debug/F_sample")
     nepoch = 40
-    batch_size = 64
-    if existing_model: 
-    	train_size = 8235
-    	running_train_size = 15560
-        tr_model = get_train_model()
-    	tr_model.load_weights(results_path+'/ft_20171019171848')
-    	i=1
-    else:
-    	train_size = 100
-    	running_train_size = 100
-    	tr_model = None
-    	i=0
-    retrain_size = 1800
+    batch_size = 100
+
+    train_size = 100
+    running_train_size = 100
+    tr_model = None
+    i=0
+
+    retrain_size = 100
     training_set_size = []
     valid_size = int(math.floor(.2 * train_size))
+    train_size = train_size - valid_size
     #print('sample size: {}'.format(train_size + valid_size))
     loss = 0.0
     loss_array = []
@@ -382,11 +378,6 @@ if __name__ == "__main__":
     for i in range(200):
         print("Train Size:{}".format(train_size))
         print("Valid Size:{}".format(valid_size))
-
-        if train_size == 0 or valid_size == 0: #handle null case
-            handle_null(50,10)
-            train_size += 50
-            valid_size += 10
 
         tr_model,file_timestamp = fit(i, tr_model, path, results_path, nepoch, batch_size, train_size, valid_size)
 

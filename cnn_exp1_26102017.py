@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 from theano.sandbox import cuda
 cuda.use('gpu1')
-#path="../data/2cat/sample"
+#path="../data/2cat_debug/sample"
 import utils; reload(utils)
 from utils import *
 from IPython.display import FileLink
@@ -16,9 +16,9 @@ from keras.layers.core import Flatten, Dense, Dropout, Lambda
 from keras.optimizers import SGD, RMSprop, Adam
 import datetime
 
-data_dir="/home/asaeed9/work/data/2cat"
-path="/home/asaeed9/work/data/2cat/sample/"
-results_path = "/home/asaeed9/work/data/2cat/sample/results"
+data_dir="/home/asaeed9/work/data/2cat_debug"
+path="/home/asaeed9/work/data/2cat_debug/sample/"
+results_path = "/home/asaeed9/work/data/2cat_debug/sample/results"
 test_path = path + '/test/' #We use all the test data
 
 def adjust_prev_data_sample(dest):
@@ -341,7 +341,7 @@ def move_files(src_path, dest_path, pattern):
     		print ("Unable to move file. ".format(e))
 
 def refil_unlabel(nimages):
-    os.chdir("/home/asaeed9/work/data/2cat/train")
+    os.chdir("/home/asaeed9/work/data/2cat_debug/F_sample")
     g = glob('*.jpg')
     shuf = np.random.permutation(g)
     for i in range(nimages): os.rename(shuf[i], '../sample/unlabel/' + shuf[i])
@@ -355,23 +355,19 @@ def refil_unlabel(nimages):
 if __name__ == "__main__":
 
     existing_model = 0
-    os.chdir("../data/2cat/train")
+    os.chdir("../data/2cat_debug/F_sample")
     nepoch = 40
     batch_size = 100
-    if existing_model: 
-    	train_size = 8235
-    	running_train_size = 15560
-        tr_model = get_train_model()
-    	tr_model.load_weights(results_path+'/ft_20171019171848')
-    	i=1
-    else:
-    	train_size = 2000
-    	running_train_size = 2000
-    	tr_model = None
-    	i=0
-    retrain_size = 2000
+
+    train_size = 100
+    running_train_size = 100
+    tr_model = None
+    i=0
+
+    retrain_size = 100
     training_set_size = []
     valid_size = int(math.floor(.2 * train_size))
+    train_size = train_size - valid_size
     #print('sample size: {}'.format(train_size + valid_size))
     loss = 0.0
     loss_array = []
@@ -386,48 +382,7 @@ if __name__ == "__main__":
         print("Train Size:{}".format(train_size))
         print("Valid Size:{}".format(valid_size))
 
-#        if train_size == 0 or valid_size == 0: #handle null case
-#            handle_null(50,10)
-#            train_size += 50
-#            valid_size += 10
-#
         tr_model,file_timestamp = fit(i, tr_model, path, results_path, nepoch, batch_size, train_size, valid_size)
-
-#        model = None
-#        model = get_test_model()
-#        #model.load_weights(results_path+'/ft_' + str(train_size) + '.e' + str(nepoch))
-#        #print('{0}/ft_{1}'.format(last_file_timestamp))
-#        #print('Last File Timestamp- before loading:{}'.format(file_timestamp))
-#        model.load_weights(results_path+'/ft_{}'.format(file_timestamp))
-#
-#        print("\nVerification on Unlabel set.")
-#        probs, test_batches,loss, accuracy = predict(path, model, "unlabel")
-#        print('\nUnlabel Accuracy:{}'.format(accuracy))
-#        print('Unlabel Loss:{}'.format(loss))
-#    #     training_set_size.append(running_train_size)
-#    #     loss_array.append(loss)
-#    #     accuracy_array.append(accuracy)
-#
-#        #get the top 100, most confused images
-#        retrain_idx = np.argsort(abs(0.5 - probs[:, 1]))[:retrain_size]
-#        #print(len(retrain_idx))
-#
-#        retrain_set = [test_batches.filenames[i] for i in retrain_idx]
-#
-#        #print('Retrain Set Length:{}'.format(len(retrain_set)))
-#
-#        os.chdir(path + 'unlabel')
-#        ndog = sum('dog' in name for name in retrain_set)
-#        ncat =  sum('cat' in name for name in retrain_set)
-#        limit = min(ncat, ndog)
-#
-#        #print('Dogs:{}, Cats:{}'.format(ndog, ncat))
-#
-#        #move existing training data to the store
-#        #adjust_prev_data_sample("used_train")
-#        train_size, valid_size, copied_images = move_to_train(retrain_set, limit)
-#        refil_unlabel(copied_images)
-#
 
         print("\nVerification on Test set.")
         model_test = None
@@ -449,4 +404,5 @@ if __name__ == "__main__":
 
 	train_size = retrain_size
 	valid_size = int(math.floor(.2 * train_size))
+        train_size = train_size - valid_size
 	running_train_size += train_size	

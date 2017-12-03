@@ -16,10 +16,10 @@ from keras.layers.core import Flatten, Dense, Dropout, Lambda
 from keras.optimizers import SGD, RMSprop, Adam
 import datetime
 
-data_dir="/home/asaeed9/work/data/2cat"
+data_dir="/home/asaeed9/work/data/2cat_debug"
 data_src="sample"
-path="/home/asaeed9/work/data/2cat/" + data_src + "/"
-results_path = "/home/asaeed9/work/data/2cat/"+ data_src + "/results"
+path="/home/asaeed9/work/data/2cat_debug/" + data_src + "/"
+results_path = "/home/asaeed9/work/data/2cat_debug/"+ data_src + "/results"
 test_path = path + '/test/' #We use all the test data
 
 def get_file_count(dir_path):
@@ -113,7 +113,7 @@ def copy_samples(train, validation):
     for i in range(validation): os.rename(shuf[i], "../" + data_src + "/valid/" + shuf[i])
     move_files(path + "valid",path + "valid/cats/","cat*.jpg")
     move_files(path + "valid",path + "valid/dogs/","dog*.jpg")
-    os.chdir(data_dir + "/train")
+    os.chdir(data_dir + "/F_sample")
 
     dog_train_count = get_file_count(path + "train/dogs/") 
     dog_valid_count = get_file_count(path + "valid/dogs/")
@@ -358,7 +358,7 @@ def move_files(src_path, dest_path, pattern):
                 print ("Unable to move file. ".format(e))
 
 def refil_unlabel(ndogs, ncats, segment):
-    os.chdir("/home/asaeed9/work/data/2cat/train")
+    os.chdir("/home/asaeed9/work/data/2cat_debug/F_sample")
     g = glob('dog*.jpg')
     shuf = np.random.permutation(g)
     for i in range(ndogs): os.rename(shuf[i], "../" + data_src + "/" +segment+ "/dogs/" + shuf[i])
@@ -368,23 +368,23 @@ def refil_unlabel(ndogs, ncats, segment):
     for i in range(ncats): os.rename(shuf[i], "../" + data_src + "/" +segment+ "/cats/" + shuf[i])
 
 if __name__ == "__main__":
-	os.chdir("/home/asaeed9/work/data/2cat/train")
+	os.chdir("/home/asaeed9/work/data/2cat_debug/F_sample")
 	nepoch = 40
 	batch_size = 100
-	train_size = 500
+	train_size = 100
 	tr_model = None
 	i=0
-	retrain_size = 500
+	retrain_size = 100
 	training_set_size = []
 	valid_size = int(math.floor(.2 * train_size))
+        train_size = train_size - valid_size
 	#print('sample size: {}'.format(train_size + valid_size))
 	loss = 0.0
 	loss_array = []
 	accuracy = 0.0 
 	accuracy_array = []
 
-	#clean previous data
-	adjust_prev_data("train")
+	#adjust_prev_data("train")
 	dog_train_count, dog_valid_count, cat_train_count, cat_valid_count = copy_samples(train_size, valid_size)
 	print("Train Size: {} \nValid Size: {}".format(dog_train_count + cat_train_count, dog_valid_count + cat_valid_count))    
 	for i in range(300):
